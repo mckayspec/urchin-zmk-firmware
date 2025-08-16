@@ -1,6 +1,5 @@
 /*
- * Urchin / Ferris-Sweep style keymap — 4 core layers
- * Copyright (c) 2020 duckyb
+ * Urchin / Ferris-Sweep style keymap — Base / Num / Code / Mac + Settings
  * SPDX-License-Identifier: MIT
  * (adapted for McKay)
  */
@@ -11,26 +10,30 @@
 #include <dt-bindings/zmk/outputs.h>
 
 /* -------------------
- * Layer definitions
+ * Layer indices
  * ------------------- */
-#define BASE      0   // letters + daily punctuation ( , . - tab return space delete )
-#define NUM       1   // numbers + arithmetic + = < >
-#define CODE      2   // coding semantics: {} [] () quotes | \ ; : etc + quick-taps (=>, ==, ->, ===)
-#define MAC       3   // macros: spotlight, hyper, navigation, common cmd/opt/ctrl/shift shortcuts
-#define SETTINGS  4   // utilities (BT select, bootloader, unstick) — via combo like before
+#define BASE      0
+#define NUM       1
+#define CODE      2
+#define MAC       3
+#define SETTINGS  4
 
 /* -------------------
- * Behavior helpers
+ * Sticky-keys tuning
  * ------------------- */
-
 &sk {
-  // don't release mods on other mods presses (useful for sticky-mod macros)
+  // keep sticky mods even if another mod is pressed
   ignore-modifiers;
 };
 
- / {
+/* -------------------
+ * Behaviors & Macros
+ * ------------------- */
+ /
+{
   behaviors {
-    // quick-tap: tap then hold if held again quickly; great for punctuation operators
+    // Quick-tap = hold-preferred hold-tap with quick-tap timing
+    // Use as:  &qt LSHIFT SPACE
     qt: quick_tap {
       compatible = "zmk,behavior-hold-tap";
       label = "QUICK_TAP";
@@ -42,11 +45,8 @@
     };
   };
 
-  /* -------------------
-   * Macros
-   * ------------------- */
   macros {
-    // Fix stuck modifiers
+    // Clear stuck modifiers: press all mods to reset state
     unstick: unstick {
       label = "ZM_unstick";
       compatible = "zmk,behavior-macro";
@@ -54,24 +54,23 @@
       bindings = <&kp LSHIFT &kp RSHIFT &kp LCTRL &kp RCTRL &kp LALT &kp RALT &kp LGUI &kp RGUI>;
     };
 
-    // Spotlight = Cmd+Space
+    // Spotlight (Cmd+Space)
     spotlight: spotlight {
       label = "Spotlight";
       compatible = "zmk,behavior-macro";
       #binding-cells = <0>;
-      bindings = <&kp LC(SPACE)>;
+      bindings = <&kp LG(SPACE)>;
     };
 
-    // "Hyper" one-shot (Cmd+Opt+Ctrl+Shift) implemented via sticky-mods so the *next* key gets all four
+    // "Hyper" one-shot (Cmd+Opt+Ctrl+Shift) for the NEXT key
     hyper_os: hyper_os {
       label = "HyperOS";
       compatible = "zmk,behavior-macro";
       #binding-cells = <0>;
-      // stack stickies for the next keystroke
       bindings = <&sk LGUI &sk LALT &sk LCTRL &sk LSHIFT>;
     };
 
-    // Common terminal helpers (easy reach on MAC layer)
+    // Terminal staples
     term_tab: term_tab {
       label = "TermTAB";
       compatible = "zmk,behavior-macro";
@@ -82,7 +81,7 @@
       label = "TermSlash";
       compatible = "zmk,behavior-macro";
       #binding-cells = <0>;
-      bindings = <&kp IT_FSLH>;
+      bindings = <&kp SLSH>;
     };
     term_dot: term_dot {
       label = "TermDot";
@@ -91,37 +90,35 @@
       bindings = <&kp DOT>;
     };
 
-    // Quick operators (coding)
+    // Quick coding operators
     arrow_func: arrow_func {   // =>
       label = "=>";
       compatible = "zmk,behavior-macro";
       #binding-cells = <0>;
-      bindings = <&kp IT_EQL &kp IT_GREAT>;
+      bindings = <&kp EQUAL &kp S(DOT)>;
     };
     eqeq: eqeq {               // ==
       label = "==";
       compatible = "zmk,behavior-macro";
       #binding-cells = <0>;
-      bindings = <&kp IT_EQL &kp IT_EQL>;
+      bindings = <&kp EQUAL &kp EQUAL>;
     };
     eqeqeq: eqeqeq {           // ===
       label = "===";
       compatible = "zmk,behavior-macro";
       #binding-cells = <0>;
-      bindings = <&kp IT_EQL &kp IT_EQL &kp IT_EQL>;
+      bindings = <&kp EQUAL &kp EQUAL &kp EQUAL>;
     };
     arrow_right: arrow_right { // ->
       label = "->";
       compatible = "zmk,behavior-macro";
       #binding-cells = <0>;
-      bindings = <&kp IT_MINUS &kp IT_GREAT>;
+      bindings = <&kp MINUS &kp S(DOT)>;
     };
   };
 
   /* -------------------
-   * Combos
-   *   Keep your original thumb/hand combos so layer access stays intuitive.
-   *   Key positions 30-33 assumed like your original.
+   * Combos (adjust key-positions if your board differs)
    * ------------------- */
   combos {
     compatible = "zmk,combos";
@@ -133,7 +130,7 @@
       bindings = <&mo MAC>;
     };
 
-    // internal-left & external-right thumb keys -> CODE layer
+    // inner-left & outer-right thumb keys -> CODE layer
     combo_code {
       timeout-ms = <200>;
       key-positions = <31 33>;
@@ -147,7 +144,7 @@
       bindings = <&mo SETTINGS>;
     };
 
-    // ctrl+space for Adobe/Spotlight-like chord on base (kept from your idea)
+    // ctrl + space chord on Base (kept from your workflow)
     combo_ctrl_space {
       timeout-ms = <200>;
       key-positions = <12 13>;
@@ -157,72 +154,63 @@
   };
 
   /* -------------------
-   * Keymap
+   * Keymap (Ferris-style: 3 rows × 10 + 5 thumbs)
    * ------------------- */
   keymap {
     compatible = "zmk,keymap";
 
-    /* Base — letters + core punctuation (comma, dot, hyphen, tab, return, space, delete)
-     * Thumbs: left holds NUM; right holds CODE (like your mental model)
-     */
+    // ========= Base =========
     default_layer {
       label = "Base";
       bindings = <
-        &kp Q   &kp W   &kp E   &kp R   &kp T                 &kp Y   &kp U     &kp I     &kp O     &kp P
-        &kp A   &kp S   &kp D   &kp F   &kp G                 &kp H   &kp J     &kp K     &kp L     &kp IT_MINUS   // keep '-' handy
-        &kp Z   &kp X   &kp C   &kp V   &kp B                 &kp N   &kp M     &kp COMMA &kp DOT   &kp IT_FSLH    // '/' on base edge
-                                &kp TAB  &qt LSHIFT SPACE     &kp SPACE  &kp ENTER
+        &kp Q      &kp W      &kp E      &kp R      &kp T           &kp Y      &kp U      &kp I      &kp O      &kp P
+        &kp A      &kp S      &kp D      &kp F      &kp G           &kp H      &kp J      &kp K      &kp L      &kp APOSTROPHE
+        &kp Z      &kp X      &kp C      &kp V      &kp B           &kp N      &kp M      &kp COMMA  &kp DOT    &kp SLSH
+                                     &mo NUM   &qt LSHIFT SPACE     &kp SPACE  &mo CODE   &kp BSPC
       >;
-      // Delete access via long-press/backspace is common; if you want a dedicated DEL, put it in MAC layer.
     };
 
-    /* Numeric — numbers and arithmetic (+ = < > etc.)
-     * Right thumb can hop to CODE or back to BASE; left thumb returns to BASE quickly.
-     */
+    // ========= Numeric / Symbols =========
     num_layer {
       label = "Num";
       bindings = <
-        &kp N1        &kp N2        &kp N3        &kp N4        &kp N5            &kp N6        &kp N7        &kp N8        &kp N9        &kp N0
-        &kp IT_EQL    &kp IT_PLUS   &kp IT_LPAR   &kp IT_RPAR   &kp IT_LESS       &kp IT_GREAT  &kp IT_LBKT   &kp IT_RBKT   &kp IT_LBRC   &kp IT_RBRC
-        &kp IT_AST    &kp IT_SLSH   &kp IT_PERC   &kp IT_MINUS  &kp IT_UNDER      &kp IT_COMMA  &kp IT_DOT    &kp IT_COLON  &kp IT_SCLN   &kp IT_BKTK
-                                          &trans  &trans                         &trans        &mo CODE
+        &kp N1     &kp N2     &kp N3     &kp N4     &kp N5          &kp N6     &kp N7     &kp N8     &kp N9     &kp N0
+        &kp EQUAL  &kp S(EQUAL) &kp LPRN &kp RPRN   &kp MINUS       &kp LBKT   &kp RBKT   &kp LBRC   &kp RBRC   &kp BSLH
+        &kp S(N8)  &kp S(SLSH) &kp S(N5) &kp S(MINUS) &kp GRAVE     &kp COMMA  &kp DOT    &kp S(SEMI)&kp SEMI   &kp GRAVE
+                                   &mo MAC     &mo CODE             &trans     &trans     &trans
       >;
     };
 
-    /* Coding Semantics — all the punctuation you reach for while coding.
-     * Includes quick operators on the right hand for speed.
-     */
+    // ========= Coding Semantics =========
     coding_layer {
       label = "Code";
       bindings = <
-        &kp IT_BKTK   &kp IT_TILDE  &kp IT_EXCL   &kp IT_AT     &kp IT_HASH      &kp IT_DLR   &kp IT_PERC   &kp IT_CARET &kp IT_AND   &kp IT_AST
-        &kp IT_LPAR   &kp IT_RPAR   &kp IT_LBKT   &kp IT_RBKT   &kp IT_LBRC      &kp IT_RBRC  &kp IT_QUES   &kp IT_SQUOT &kp IT_DQUOT &kp IT_PIPE
-        &kp IT_FSLH   &kp IT_BSLH   &kp IT_COLON  &kp IT_SCLN   &kp IT_UNDER     &eqeq        &eqeqeq       &arrow_right &arrow_func  &kp IT_EQL
-                                          &mo NUM &trans                         &trans       &trans
+        &kp GRAVE  &kp S(GRAVE) &kp S(N1) &kp S(N2) &kp S(N3)       &kp S(N4)  &kp S(N5)  &kp S(N6)  &kp S(N7)  &kp S(N8)
+        &kp LPRN   &kp RPRN     &kp LBKT  &kp RBKT  &kp LBRC        &kp RBRC   &kp S(N2)  &kp APOSTROPHE &kp S(APOSTROPHE) &kp PIPE
+        &kp SLSH   &kp BSLH     &kp S(SEMI) &kp SEMI &kp S(MINUS)   &eqeq      &eqeqeq    &arrow_right &arrow_func &kp EQUAL
+                                   &mo NUM    &trans                &trans     &trans     &trans
       >;
     };
 
-    /* Macros / Power — spotlight, hyper one-shot, navigation, deletion, common CMD combos.
-     * Terminal staples (. / TAB) live here too for muscle memory.
-     */
+    // ========= Macros / Power =========
     macros_layer {
       label = "Mac";
       bindings = <
-        &spotlight     &kp LC(T)      &kp LC(R)      &kp LC(W)      &kp LC(Q)          &kp HOME         &kp PG_UP       &kp UP         &kp PG_DN     &kp END
-        &hyper_os      &kp LC(LEFT)   &kp LC(RIGHT)  &kp LG(LEFT)   &kp LG(RIGHT)      &kp LEFT         &kp DOWN        &kp RIGHT      &kp DEL       &unstick
-        &term_tab      &term_slash    &term_dot      &kp BACKSPACE  &kp LG(BACKSPACE)  &kp LC(BSPC)     &kp LC(DEL)     &kp LG(D)      &kp LG(OPT)   &kp CAPS
-                                               &trans  &trans                          &trans            &mo CODE
+        &spotlight   &kp LC(T)    &kp LC(R)    &kp LC(W)    &kp LC(Q)    &kp HOME   &kp PG_UP  &kp UP     &kp PG_DN   &kp END
+        &hyper_os    &kp LG(LEFT) &kp LG(RIGHT)&kp LC(LEFT) &kp LC(RIGHT)&kp LEFT   &kp DOWN   &kp RIGHT  &kp DELETE  &unstick
+        &term_tab    &term_slash  &term_dot    &kp BSPC     &kp LG(BSPC) &kp LC(BSPC) &kp LC(DELETE) &kp LG(D) &kp LG(S) &kp CAPS
+                                    &trans      &trans       &trans       &mo CODE    &trans
       >;
     };
 
-    /* Settings — kept lightweight; reached by left-thumb combo */
+    // ========= Settings / BT / Boot =========
     settings_layer {
       label = "Sett.";
       bindings = <
-        &bootloader &none &none &bt BT_CLR  &bt BT_SEL 0          &bt BT_SEL 3 &none &unstick &none &bootloader
-        &none       &none &none &none       &bt BT_SEL 1          &bt BT_SEL 4 &none &none    &none &none
-        &studio_unlock &none &none &none    &bt BT_SEL 2          &bt BT_SEL 5 &none &none    &none &studio_unlock
-                                           &none &none            &none &none
+        &bootloader  &trans  &trans  &bt BT_CLR   &bt BT_SEL 0   &bt BT_SEL 3  &trans  &unstick  &trans  &bootloader
+        &trans       &trans  &trans  &trans       &bt BT_SEL 1   &bt BT_SEL 4  &trans  &trans    &trans  &trans
+        &trans       &trans  &trans  &trans       &bt BT_SEL 2   &bt BT_SEL 5  &trans  &trans    &trans  &trans
+                                   &trans     &trans            &trans        &trans   &trans
       >;
     };
   };
