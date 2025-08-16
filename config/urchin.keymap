@@ -29,8 +29,7 @@
 /* -------------------
  * Behaviors & Macros
  * ------------------- */
- /
-{
+ /{
   behaviors {
     // Quick-tap = hold-preferred hold-tap with quick-tap timing
     // Use as:  &qt LSHIFT SPACE
@@ -144,7 +143,7 @@
       bindings = <&mo SETTINGS>;
     };
 
-    // ctrl + space chord on Base (kept from your workflow)
+    // ctrl + space chord on Base
     combo_ctrl_space {
       timeout-ms = <200>;
       key-positions = <12 13>;
